@@ -4,7 +4,7 @@
 
 **PHP已经安装常用扩展redis,memcached,swoole**
 
-
+**swoft,hyperf框架支持**
 
 **查询所有的容器，过滤出Exited状态的容器，列出容器ID，删除这些容器**
 
