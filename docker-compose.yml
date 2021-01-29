@@ -1,0 +1,98 @@
+version: '3'
+services:
+    nginx1.19:
+        build: ./nginx
+        image:  nginx:1.19
+        container_name: nginx1.19
+        volumes:
+            - "/data:/data"
+            - "/data/docker/nginx/conf/vhost:/usr/local/nginx/conf/vhost"
+        networks:
+            mynet:
+                ipv4_address: 172.18.18.2
+        restart: always
+        ports:
+            - "80:80"
+            - "443:443"
+    redis6-6379:
+        build: ./redis-6379
+        image:  redis:6
+        container_name: redis6-6379
+        volumes:
+            - "/data:/data"
+        networks:
+            mynet:
+                ipv4_address: 172.18.18.11
+        restart: always
+        ports:
+            - "6379:6379"
+    mysql5.7-3306:
+        build: ./mysql
+        image:  mysql:5.7
+        container_name: mysql5.7-3306
+        environment:
+            MYSQL_ROOT_PASSWORD: 123456
+        volumes:
+            - "/data:/data"
+        networks:
+            mynet:
+                ipv4_address: 172.18.18.21
+        restart: always
+        ports:
+            - "3306:3306"
+    php7.3:
+        build: ./php7.3
+        image:  php:7.3
+        container_name: php7.3
+        volumes:
+            - "/data:/data"
+        networks:
+            mynet:
+                ipv4_address: 172.18.18.101
+        restart: always
+        ports:
+            - "9000:9000"
+    consul-server-01:
+        build: ./consul
+        image:  consul:1.8
+        container_name: consul-server-01
+        command: agent -server -bootstrap-expect=3 -client 0.0.0.0 -node=consul-server-01 -datacenter=dc1
+        networks:
+            mynet:
+                ipv4_address: 172.18.18.201
+        restart: always
+    consul-server-02:
+        build: ./consul
+        image:  consul:1.8
+        container_name: consul-server-02
+        command: agent -server -retry-join=consul-server-01 -client 0.0.0.0 -node=consul-server-02 -datacenter=dc1
+        networks:
+            mynet:
+                ipv4_address: 172.18.18.202
+        restart: always
+    consul-server-03:
+        build: ./consul
+        image:  consul:1.8
+        container_name: consul-server-03
+        command: agent -server -retry-join=consul-server-01 -client 0.0.0.0 -node=consul-server-03 -datacenter=dc1
+        networks:
+            mynet:
+                ipv4_address: 172.18.18.203
+        restart: always
+    consul-server-00:
+        build: ./consul
+        image:  consul:1.8
+        container_name: consul-server-00
+        command: agent -retry-join=consul-server-01  -client 0.0.0.0 -ui -node=consul-server-00 -datacenter=dc1
+        networks:
+            mynet:
+                ipv4_address: 172.18.18.200
+        restart: always
+        ports:
+            - "8900:8500"
+networks:
+    mynet:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: "172.18.18.0/16"
